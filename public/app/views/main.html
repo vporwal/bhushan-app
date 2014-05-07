@@ -1,0 +1,20 @@
+<style type="text/css"> 
+a {
+  cursor: pointer;
+}
+.textStyle
+{
+	width: 800px; !important;
+}
+</style>  
+<nav class="navbar" role="navigation" style="color: #bbb;border-bottom: 1px solid #444;">
+	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+		<form action="/searchByUrl" class="navbar-form navbar-left  form-inline" role="search" style="width: 100%;">
+          <div class="form-group" style="width: 60%;margin-left: 18%;">
+		    <label  class="sr-only" for="Search_Url">Search Keyword</label>
+		    <input type="url" name="Search_Url" class="input-xlarge form-control textStyle" style="width: 100%;" data-ng-model="searchForm.searchUrl" id="Search_Url" placeholder="Enter Url" required>
+		  </div>
+		  <button type="submit" class="btn btn-primary"  data-ng-disabled="(searchForm.searchUrl.length<8)" style="float: right; ">Search</button>
+      	</form>
+	</div>
+</nav>
