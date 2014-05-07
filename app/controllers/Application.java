@@ -58,7 +58,7 @@ public class Application extends Controller {
 	public static Result searchData() throws ParseException, ClientProtocolException, IOException, JSONException {
 		DynamicForm form = DynamicForm.form().bindFromRequest();
 		System.out.println(Base_URL);
-		String urlString =Base_URL+"part=snippet&key="+api_key+"&maxResults=20";//
+		String urlString =Base_URL+"part=snippet&key="+api_key+"&maxResults=50";//
 		String searchString = form.get("Search_Keyword");
 		if(searchString!= null && !searchString.isEmpty())
 		{

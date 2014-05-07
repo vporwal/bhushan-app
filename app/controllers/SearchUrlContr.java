@@ -37,12 +37,10 @@ public class SearchUrlContr extends Controller {
     	   Document doc= null;
     				try {
     					//htmlMainUrl=URLEncoder.encode(htmlMainUrl,"UTF-8");
-    					doc=Jsoup.connect(htmlMainUrl).get();
-					} catch (UnsupportedEncodingException e1) {
+    					doc=Jsoup.connect(htmlMainUrl).userAgent("Mozilla").get();;
+					} catch (Exception e1) {
 						e1.printStackTrace();
-					}
-    				 catch (IOException e) {
-						e.printStackTrace();
+						return ok("Not able to call URL by parser lib");
 					}
     				Elements links= new Elements();
     				links =doc.getElementsByAttribute("href");
