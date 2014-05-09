@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,47 +36,60 @@ public class SearchUrlContr extends Controller {
     	String htmlMainUrl = form.get("Search_Url");
     	String fileName="";
 		String dateName="";
-    	   Document doc= null;
-    				try {
-    					//htmlMainUrl=URLEncoder.encode(htmlMainUrl,"UTF-8");
-    					doc=Jsoup.connect(htmlMainUrl).userAgent("Mozilla").get();;
-					} catch (Exception e1) {
-						e1.printStackTrace();
-						return ok("Not able to call URL by parser lib");
-					}
-    				Elements links= new Elements();
-    				links =doc.getElementsByAttribute("href");
-    	        	List<UrlResult> urlResults = generateArrayList(links, htmlMainUrl);
-    	        	CellProcessor[] processors = new CellProcessor[] {
-    				        new NotNull(),// mainUrl
-    				        new NotNull()//urls
-    				};
-    	        	File file = new File(filePath);
-    				if(!file.exists())
-    				{
-    					file.mkdir();
-    				}
-					long currentTime = System.currentTimeMillis();
-					Date date = new Date(currentTime);
-				    DateFormat df = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss");
-				    dateName = df.format(date);
-					ICsvBeanWriter beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
-					        CsvPreference.STANDARD_PREFERENCE);
-					String[] header = {"mainUrl","urls"};
-					beanWriter.writeHeader(header);
-					for(UrlResult result : urlResults) {
-					   beanWriter.write(result, header, processors);
-					}
-					beanWriter.flush();
-					beanWriter.close();
-					response().setContentType("application/octet-stream");
-					response().setHeader("Content-Disposition",
-					"attachment;filename="+fileName+'-'+dateName+".csv");		
-    		return ok(new File(filePath+File.separator+fileName+'-'+dateName+".csv"));
+    	Document doc= null;
+			try {
+				URI uri = new URI(htmlMainUrl);
+					if(uri != null)
+					fileName=uri.getHost();
+				doc=Jsoup.connect(htmlMainUrl).userAgent("Mozilla").get();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			 catch (UnsupportedEncodingException e1) {
+				e1.printStackTrace();
+				return ok("Not able to call URL by parser lib");
+			}
+			 catch (IOException e) {
+				e.printStackTrace();
+				return ok("Not able to call URL by parser lib");
+			}
+		Elements links= new Elements();
+			if(doc != null)
+			{
+				links =doc.getElementsByAttribute("href");
+			}
+    	List<UrlResult> urlResults = generateArrayList(links, htmlMainUrl);
+	    	CellProcessor[] processors = new CellProcessor[] {
+			        new NotNull(),// mainUrl
+			        new NotNull(),//urls
+			        new NotNull()//text
+			};
+    	        	
+	    File file = new File(filePath);
+			if(!file.exists()){
+				file.mkdir();
+			}
+		long currentTime = System.currentTimeMillis();
+		Date date = new Date(currentTime);
+	    DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
+	    dateName = df.format(date);
+		ICsvBeanWriter beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
+		        CsvPreference.STANDARD_PREFERENCE);
+		String[] header = {"mainUrl","urls","title"};
+		beanWriter.writeHeader(header);
+			for(UrlResult result : urlResults) {
+			   beanWriter.write(result, header, processors);
+			}
+			beanWriter.flush();
+			beanWriter.close();
+			response().setContentType("application/octet-stream");
+			response().setHeader("Content-Disposition",
+			"attachment;filename="+dateName+"_"+fileName+".csv");
+			
+    	return ok(new File(filePath+File.separator+fileName+'-'+dateName+".csv"));
     }
     public static List<UrlResult> generateArrayList(Elements links,String htmlMainUrl)  {
     	List<UrlResult> urlResults= new ArrayList<>();
-    	try {
 	    	for (Element link : links) 
 	    	{
 	    		Elements linksCss= link.getElementsByTag("link");
@@ -87,13 +102,11 @@ public class SearchUrlContr extends Controller {
 			    	{
 			    		result.urls= urls;
 			    		result.mainUrl=htmlMainUrl;
+			    		result.title=link.text();
 			    	}
 			    	urlResults.add(result);
 	    		}
 			}
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		} 
 	    return urlResults;
 	}
 }

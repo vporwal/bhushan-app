@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -21,6 +22,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.joda.time.Period;
+import org.joda.time.Seconds;
+import org.joda.time.format.ISOPeriodFormat;
+import org.joda.time.format.PeriodFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,6 +39,7 @@ import org.supercsv.prefs.CsvPreference;
 
 import play.Play;
 import play.data.DynamicForm;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -156,7 +162,9 @@ public class Application extends Controller {
 			    JSONObject contentDetailsJson=object.getJSONObject("contentDetails");
 			    if(contentDetailsJson != null)
 			    {
-			      result.duration      =contentDetailsJson.getString("duration");
+			    	String time=contentDetailsJson.getString("duration");
+			    	time=convert_time(time);
+			    	result.duration      =time;
 			    }
 			    results.add(result);
 			}
@@ -173,7 +181,6 @@ public class Application extends Controller {
 			        new NotNull(),// channelTitle
 			        new NotNull()//fullDesc
 			};
-			//String csvFileName = "Java_Books.csv";
 			File file = new File(filePath);
 			if(!file.exists())
 			{
@@ -182,9 +189,9 @@ public class Application extends Controller {
 			
 			long currentTime = System.currentTimeMillis();
 			Date date = new Date(currentTime);
-		    DateFormat df = new SimpleDateFormat("MM-dd-yyyy-HH-mm-ss");
+		    DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
 		    dateName = df.format(date);
-		    fileName = fileName+'-'+dateName+".csv";
+		    
 		    beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
 			        CsvPreference.STANDARD_PREFERENCE);
 			String[] header = {"videoId", "urlVideo", "title","publishedDate","likes","disLikes","noOfComments","viewCount","duration","channelTitle","fullDesc"};
@@ -205,7 +212,7 @@ public class Application extends Controller {
 		} 
 		response().setContentType("application/octet-stream");
 		response().setHeader("Content-Disposition",
-		"attachment;filename="+fileName+'-'+dateName+".csv");
+		"attachment;filename="+dateName+"_"+fileName+".csv");
 		return ok(new File(filePath+File.separator+fileName+'-'+dateName+".csv"));
 	}
 
@@ -224,5 +231,10 @@ public class Application extends Controller {
 			return jsonObj;
 	}
 
-	
+	public static String convert_time(String duration) {
+		PeriodFormatter formatter = ISOPeriodFormat.standard();
+		Period p = formatter.parsePeriod(duration);
+	    duration=p.getHours()+":"+p.getMinutes()+":"+p.getSeconds();
+	    return duration;
+	}
 }
