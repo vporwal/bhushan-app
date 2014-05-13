@@ -17,7 +17,7 @@ angular.module('youTube', [
 ])
   .config(function ($routeProvider) {
     $routeProvider
-      .when('/', {
+      .when('/redirectToYouTube', {
         templateUrl: '/assets/app/views/home.html',
         controller: 'SearchController'	
       })

@@ -48,6 +48,7 @@ public class Application extends Controller {
     static final String Base_For_Vid_URL = Play.application().configuration().getString("Base_For_Vid_URL");
     static final String filePath = Play.application().configuration().getString("filePath");
     static final String api_key = Play.application().configuration().getString("api_key");
+    
     public static Result index() {
 		return ok(views.html.home.render());
 	}
@@ -60,115 +61,134 @@ public class Application extends Controller {
 		return ok(views.html.main.render());
 	}
     
-    @SuppressWarnings("resource")
 	public static Result searchData() throws ParseException, ClientProtocolException, IOException, JSONException {
 		DynamicForm form = DynamicForm.form().bindFromRequest();
 		System.out.println(Base_URL);
 		String urlString =Base_URL+"part=snippet&key="+api_key+"&maxResults=50";//
 		String searchString = form.get("Search_Keyword");
-		if(searchString!= null && !searchString.isEmpty())
-		{
-			searchString = URLEncoder.encode(searchString,"UTF-8");
-			urlString+="&q="+searchString;
-		}
+			if(searchString!= null && !searchString.isEmpty()){
+				searchString = URLEncoder.encode(searchString,"UTF-8");
+				urlString+="&q="+searchString;
+			}
 		String channel=form.get("Channel_Keyword");
-		if(channel != null && !channel.isEmpty())
-		{
-		    channel = URLEncoder.encode(channel,"UTF-8");
-		    urlString+="&channelId="+channel;
-		}
+			if(channel != null && !channel.isEmpty()){
+			    channel = URLEncoder.encode(channel,"UTF-8");
+			    urlString+="&channelId="+channel;
+			}
 		String frmDate =  form.get("from");
 		DateFormat format = new SimpleDateFormat("MMM-dd-yyyy");
 		DateFormat format2 = new SimpleDateFormat("yyyy-dd-MM'T'HH:mm:ssZ");
-		if(frmDate != null && !frmDate.isEmpty())
-		{
-			Date date = format.parse(frmDate);
-			frmDate= format2.format(date);
-			frmDate = URLEncoder.encode(frmDate,"UTF-8");
-		    urlString+="&publishedAfter="+frmDate;
-		}
+			if(frmDate != null && !frmDate.isEmpty()){
+				Date date = format.parse(frmDate);
+				frmDate= format2.format(date);
+				frmDate = URLEncoder.encode(frmDate,"UTF-8");
+			    urlString+="&publishedAfter="+frmDate;
+			}
 		
 		String toDate = form.get("to"); 
-		if(toDate != null && !toDate.isEmpty())
-		{
-			Date date = format.parse(toDate);
-			toDate= format2.format(date);
-			toDate = URLEncoder.encode(toDate,"UTF-8");
-			urlString+="&publishedBefore="+toDate;
-		}
+			if(toDate != null && !toDate.isEmpty()){
+				Date date = format.parse(toDate);
+				toDate= format2.format(date);
+				toDate = URLEncoder.encode(toDate,"UTF-8");
+				urlString+="&publishedBefore="+toDate;
+			}
 		String searchBy = URLEncoder.encode(form.get("searchBy"),"UTF-8");  
-		if(searchBy != null && !searchBy.isEmpty())
-		{
-			searchBy = URLEncoder.encode(searchBy,"UTF-8");
-			 urlString+="&order="+searchBy;
-		}
+			if(searchBy != null && !searchBy.isEmpty()){
+				searchBy = URLEncoder.encode(searchBy,"UTF-8");
+				urlString+="&order="+searchBy;
+			}
+	    
+		String features = URLEncoder.encode(form.get("features"),"UTF-8");
+     	String duration = URLEncoder.encode(form.get("duration"),"UTF-8");  
+	   
+			if(features != null && !features.isEmpty()){
+				features = URLEncoder.encode(features,"UTF-8");
+				urlString+="&videoDefinition="+features;
+				urlString+="&type=video";
+			}
 		
-		String fileName=searchString;
+			if(duration != null && !duration.isEmpty()){
+				duration = URLEncoder.encode(duration,"UTF-8");
+				urlString+="&videoDuration="+duration;
+				if(features.isEmpty())
+				urlString+="&type=video";
+			}
+		String fileName=form.get("Search_Keyword");
 		String dateName="";
 		ICsvBeanWriter beanWriter = null;
-		try {
-			JSONObject jsonObj = getJsonObjFromUrl(urlString);
- 			JSONArray array = jsonObj.getJSONArray("items");
-			String videoIds="";
-				for(int n = 0; n < array.length(); n++)
-				{
-				    JSONObject object = array.getJSONObject(n);
-				    JSONObject objectI=object.getJSONObject("id");
-				   boolean isVid = objectI.isNull("videoId");
-				   String vId="";
-				   if(!isVid)
-				   {
+			JSONObject jsonObj = null;
+			JSONArray array = null;
+			try {
+				jsonObj = getJsonObjFromUrl(urlString);
+				if(jsonObj != null)
+					array = jsonObj.getJSONArray("items");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+	
+		String videoIds="";
+			for(int n = 0; n < array.length(); n++){
+			    JSONObject object = array.getJSONObject(n);
+			    JSONObject objectI=object.getJSONObject("id");
+			   boolean isVid = objectI.isNull("videoId");
+			   String vId="";
+				   if(!isVid){
 					    vId = objectI.getString("videoId");
 					    System.out.println(vId);
 					    videoIds += vId+",";
 				   }
-				   if(n==array.length()-1)
-				    {
+				   if(n==array.length()-1 && !videoIds.isEmpty()) {
 				    	videoIds=videoIds.substring(0, videoIds.length()-1);
 				    }
-				}
-			//System.out.println("videoIds "+videoIds);
-			String urlStrForVid = Base_For_Vid_URL+"id="+videoIds+"&key="+api_key+"&part=snippet,contentDetails,statistics,status";
-			JSONObject jsonObj2 = getJsonObjFromUrl(urlStrForVid);
-			JSONArray array2 = jsonObj2.getJSONArray("items");
-			List<YouTubeResult> results= new ArrayList<>();
-			for(int n = 0; n < array2.length(); n++)
-			{
+			}
+		String urlStrForVid = Base_For_Vid_URL+"id="+videoIds+"&key="+api_key+"&part=snippet,contentDetails,statistics,status";
+		JSONObject jsonObj2;
+		JSONArray array2 = null ;
+			try {
+				jsonObj2 = getJsonObjFromUrl(urlStrForVid);
+				if(jsonObj2 != null)
+					array2 = jsonObj2.getJSONArray("items");
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
+			
+		List<YouTubeResult> results= new ArrayList<>();
+			for(int n = 0; n < array2.length(); n++){
 				YouTubeResult result = new  YouTubeResult(); 
 			    JSONObject object = array2.getJSONObject(n);
 			    JSONObject snoppetJson= null;
-			    if(object != null)
-			    {
-				    result.videoId       =object.getString("id");
-				    result.urlVideo      ="http://www.youtube.com/watch?v="+ result.videoId;
-				    snoppetJson=object.getJSONObject("snippet");
-			    }
-			    if(snoppetJson != null)
-			    {
-				    result.publishedDate = snoppetJson.getString("publishedAt");
-				    
-				    result.title         = snoppetJson.getString("title");
-				    result.fullDesc      = snoppetJson.getString("description");
-				    result.channelTitle  = snoppetJson.getString("channelTitle");
-			    }
+				    if(object != null){
+					    result.videoId =object.getString("id");
+					    result.urlVideo ="http://www.youtube.com/watch?v="+ result.videoId;
+					    snoppetJson=object.getJSONObject("snippet");
+				    }
+				    if(snoppetJson != null){
+					    result.publishedDate = snoppetJson.getString("publishedAt");
+					    
+					    result.title = snoppetJson.getString("title");
+					    result.fullDesc = snoppetJson.getString("description");
+					    result.channelTitle= snoppetJson.getString("channelTitle");
+				    }
 			    JSONObject statisticsJson=object.getJSONObject("statistics");
-			    if(statisticsJson != null)
-			    {
-				    result.likes         =statisticsJson.getLong("likeCount");
-				    result.disLikes      =statisticsJson.getLong("dislikeCount");
-				    result.noOfComments  =statisticsJson.getLong("commentCount");
-				    result.viewCount     =statisticsJson.getLong("viewCount");
-			    }
+				    if(statisticsJson != null) {
+					    result.likes =statisticsJson.getLong("likeCount");
+					    result.disLikes =statisticsJson.getLong("dislikeCount");
+					    result.noOfComments=statisticsJson.getLong("commentCount");
+					    result.viewCount=statisticsJson.getLong("viewCount");
+			       }
 			    JSONObject contentDetailsJson=object.getJSONObject("contentDetails");
-			    if(contentDetailsJson != null)
-			    {
-			    	String time=contentDetailsJson.getString("duration");
-			    	time=convert_time(time);
-			    	result.duration      =time;
-			    }
+				    if(contentDetailsJson != null){
+				    	String time=contentDetailsJson.getString("duration");
+				    	try {
+							time=convert_time(time);
+						} catch (ParseException e) {
+							time="Unknown";
+						}
+				    	result.duration =time;
+				    }
 			    results.add(result);
 			}
-			CellProcessor[] processors = new CellProcessor[] {
+		CellProcessor[] processors = new CellProcessor[] {
 			        new NotNull(), // videoId
 			        new NotNull(), // urlVideo
 			        new NotNull(), // title
@@ -181,38 +201,30 @@ public class Application extends Controller {
 			        new NotNull(),// channelTitle
 			        new NotNull()//fullDesc
 			};
-			File file = new File(filePath);
-			if(!file.exists())
-			{
+		File file = new File(filePath);
+			if(!file.exists()){
 				file.mkdir();
 			}
-			
-			long currentTime = System.currentTimeMillis();
-			Date date = new Date(currentTime);
-		    DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
-		    dateName = df.format(date);
-		    
-		    beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
-			        CsvPreference.STANDARD_PREFERENCE);
-			String[] header = {"videoId", "urlVideo", "title","publishedDate","likes","disLikes","noOfComments","viewCount","duration","channelTitle","fullDesc"};
+		long currentTime = System.currentTimeMillis();
+		Date date = new Date(currentTime);
+	    DateFormat df = new SimpleDateFormat("yyyyMMdd-HHmm");
+	    dateName = df.format(date);
+	    
+	    beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
+		        CsvPreference.STANDARD_PREFERENCE);
+		String[] header = {"videoId", "urlVideo", "title","publishedDate","likes","disLikes","noOfComments","viewCount","duration","channelTitle","fullDesc"};
 			beanWriter.writeHeader(header);
 			for (YouTubeResult result : results) {
 			   beanWriter.write(result, header, processors);
 			}
-			if(beanWriter != null)
-			{
+			if(beanWriter != null){
 				beanWriter.flush();
 			    beanWriter.close();
 			}
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		}
-		catch (URISyntaxException e) {
-			e.printStackTrace();
-		} 
-		response().setContentType("application/octet-stream");
-		response().setHeader("Content-Disposition",
-		"attachment;filename="+dateName+"_"+fileName+".csv");
+		
+			response().setContentType("application/octet-stream");
+			response().setHeader("Content-Disposition",
+			    "attachment;filename="+dateName+"_"+fileName+".csv");
 		return ok(new File(filePath+File.separator+fileName+'-'+dateName+".csv"));
 	}
 
@@ -231,10 +243,10 @@ public class Application extends Controller {
 			return jsonObj;
 	}
 
-	public static String convert_time(String duration) {
-		PeriodFormatter formatter = ISOPeriodFormat.standard();
-		Period p = formatter.parsePeriod(duration);
-	    duration=p.getHours()+":"+p.getMinutes()+":"+p.getSeconds();
-	    return duration;
+	public static String convert_time(String duration) throws ParseException   {
+			PeriodFormatter formatter = ISOPeriodFormat.standard();
+			Period p= formatter.parsePeriod(duration);
+			duration=p.getHours()+":"+p.getMinutes()+":"+p.getSeconds();
+		    return duration;
 	}
 }

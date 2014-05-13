@@ -75,7 +75,7 @@ public class SearchUrlContr extends Controller {
 	    dateName = df.format(date);
 		ICsvBeanWriter beanWriter = new CsvBeanWriter(new FileWriter(filePath+File.separator+fileName+'-'+dateName+".csv"),
 		        CsvPreference.STANDARD_PREFERENCE);
-		String[] header = {"mainUrl","urls","title"};
+		String[] header = {"mainUrl","title","urls"};
 		beanWriter.writeHeader(header);
 			for(UrlResult result : urlResults) {
 			   beanWriter.write(result, header, processors);

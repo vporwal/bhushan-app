@@ -1,57 +1,98 @@
-<style type="text/css"> 
- input[type=checkbox] {
+<style type="text/css">
+input[type=checkbox] {
 	margin: 2px 0 0;
-} 
-a {
-  cursor: pointer;
 }
-.table-striped>tbody>tr:nth-child(odd)>td, .table-striped>tbody>tr:nth-child(odd)>th {
+
+a {
+	cursor: pointer;
+}
+
+.table-striped>tbody>tr:nth-child(odd)>td,.table-striped>tbody>tr:nth-child(odd)>th
+	{
 	background-color: #fff;
 }
-.textStyle{
+
+.textStyle {
 	font-weight: 500;
 	text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
 	line-height: 20px;
 }
-</style>  
-<nav class="navbar" role="navigation" style="color: #bbb;border-bottom: 1px solid #444;">
-	 <div class="navbar-header" style="width: 20%;margin-left: 2%;margin-top: 0.5%;">
-	 	<img src="/assets/app/images/yTube.jpg" style="width: 100%" alt="Your Brand" >
-	 </div>
+</style>
+<nav class="navbar" role="navigation"
+	style="color: #bbb; border-bottom: 1px solid #444;">
+	<div class="navbar-header"
+		style="width: 20%; margin-left: 2%; margin-top: 0.5%;">
+		<img src="/assets/app/images/yTube.jpg" style="width: 100%"
+			alt="Your Brand">
+	</div>
 	<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-		 
-		<form action="/searchData" class="navbar-form navbar-left  form-inline" role="search">
-          <div class="form-group">
-		    <label  class="sr-only" for="Content_Keyword">Search Keyword</label>
-		    <input type="text" class="input-sm form-control textStyle" name="Search_Keyword" data-ng-model="searchForm.searchKeyWord" id="Search_Keyword" placeholder="Search Keyword">
-		  </div>
-		  <div class="form-group">
-		    <label  class="sr-only" for="Subject_Keyword">Channel</label>
-		    <input type="text" class="input-sm form-control textStyle" data-ng-model="searchForm.channel" name="Channel_Keyword" id="Channel_Keyword" placeholder="Channel">
-		  </div>
-		  
-		  <div class="form-group dropdown">
-		    <input type="text" name="from" class="input-sm form-control dropdown-toggle textStyle" data-toggle="dropdown" value="{{searchForm.from | date:'MMMM-dd-yyyy' || 'From'}}" placeholder="From">
-		    	<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-		    		<datetimepicker  data-ng-model="searchForm.from" data-datetimepicker-config="{ dropdownSelector: '.dropdown-toggle',minView: 'day' }"></datetimepicker>
-		  		</ul>
-		  </div>
-		  <div class="form-group dropdown">
-		    <label  for="to">To</label>
-		    <input type="text" name="to" class="input-sm form-control dropdown-toggle textStyle" data-toggle="dropdown" value="{{searchForm.to | date:'MMMM-dd-yyyy' || 'To'}}" placeholder="To">
-		    	<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-		    		<datetimepicker data-ng-model="searchForm.to" data-datetimepicker-config="{ dropdownSelector: '.dropdown-toggle',minView: 'day' }"></datetimepicker>
-		  		</ul>
-		  </div>
+
+		<form action="/searchData"
+			class="navbar-form navbar-left  form-inline" role="search">
 			<div class="form-group">
-			<select name="searchBy" class="btn btn-default" >
-			    <option  value="relevance" selected>Relevance</option>
-			     <option  value="viewcount">View Count</option>
-			      <option  value="rating">Rating</option>
-			       <option  value="date">Published</option>
-			</select>
+				<label class="sr-only" for="Content_Keyword">Search Keyword</label>
+				<input type="text" class="input-sm form-control textStyle"
+					name="Search_Keyword" data-ng-model="searchForm.searchKeyWord"
+					id="Search_Keyword" placeholder="Search Keyword">
 			</div>
-		  <button type="submit" class="btn btn-primary"  data-ng-disabled="(searchForm.searchKeyWord.length<4)">Search</button>
-      	</form>
+			<div class="form-group">
+				<label class="sr-only" for="Subject_Keyword">Channel</label> <input
+					type="text" class="input-sm form-control textStyle"
+					data-ng-model="searchForm.channel" name="Channel_Keyword"
+					id="Channel_Keyword" placeholder="Channel">
+			</div>
+
+			<div class="form-group dropdown">
+				<input type="text" name="from"
+					class="input-sm form-control dropdown-toggle textStyle"
+					data-toggle="dropdown"
+					value="{{searchForm.from | date:'MMMM-dd-yyyy' || 'From'}}"
+					placeholder="From">
+				<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+					<datetimepicker data-ng-model="searchForm.from"
+						data-datetimepicker-config="{ dropdownSelector: '.dropdown-toggle',minView: 'day' }"></datetimepicker>
+				</ul>
+			</div>
+			<div class="form-group dropdown">
+				<label for="to">To</label> <input type="text" name="to"
+					class="input-sm form-control dropdown-toggle textStyle"
+					data-toggle="dropdown"
+					value="{{searchForm.to | date:'MMMM-dd-yyyy' || 'To'}}"
+					placeholder="To">
+				<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+					<datetimepicker data-ng-model="searchForm.to"
+						data-datetimepicker-config="{ dropdownSelector: '.dropdown-toggle',minView: 'day' }"></datetimepicker>
+				</ul>
+			</div>
+			<div class="form-group">
+				<select name="searchBy" class="btn btn-default">
+				<option value="relevance" selected>Sort by</option>
+					<option value="relevance" >Relevance</option>
+					<option value="viewcount">View Count</option>
+					<option value="rating">Rating</option>
+					<option value="date">Published</option>
+				</select>
+			</div>
+			
+					<div class="form-group">
+				<select name="features" class="btn btn-default">
+					<option value="" selected> Features</option>
+					<option value="any">Any</option>
+					<option value="high">High</option>
+					<option value="standard">Standard</option>
+				</select>
+			</div>
+					<div class="form-group">
+				<select name="duration" class="btn btn-default">
+					<option value="" selected>Duration</option>
+					<option value="any">Any</option>
+					<option value="short">Short</option>
+					<option value="medium">Medium</option>
+					<option value="long">Long</option>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-primary"
+				data-ng-disabled="(searchForm.searchKeyWord.length<4)">Search</button>
+		</form>
 	</div>
 </nav>
