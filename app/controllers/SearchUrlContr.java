@@ -38,7 +38,7 @@ public class SearchUrlContr extends Controller {
 		String dateName="";
     	Document doc= null;
 			try {
-				URI uri = new URI(htmlMainUrl);
+				URI uri = new URI(htmlMainUrl.trim());
 					if(uri != null)
 					fileName=uri.getHost();
 				doc=Jsoup.connect(htmlMainUrl).userAgent("Mozilla").get();

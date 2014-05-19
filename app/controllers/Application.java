@@ -120,8 +120,13 @@ public class Application extends Controller {
 			JSONArray array = null;
 			try {
 				jsonObj = getJsonObjFromUrl(urlString);
-				if(jsonObj != null)
+				boolean isError= jsonObj.has("error");
+				if(isError){
+					return ok("we are not getting proper response with tese search parameters \n  \n  \n"+jsonObj);
+				}
+				else if(jsonObj != null){
 					array = jsonObj.getJSONArray("items");
+				}
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
