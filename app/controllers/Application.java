@@ -77,7 +77,7 @@ public class Application extends Controller {
 			}
 		String frmDate =  form.get("from");
 		DateFormat format = new SimpleDateFormat("MMM-dd-yyyy");
-		DateFormat format2 = new SimpleDateFormat("yyyy-dd-MM'T'HH:mm:ssZ");
+		DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 			if(frmDate != null && !frmDate.isEmpty()){
 				Date date = format.parse(frmDate);
 				frmDate= format2.format(date);
