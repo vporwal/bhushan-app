@@ -122,7 +122,7 @@ public class Application extends Controller {
 				jsonObj = getJsonObjFromUrl(urlString);
 				boolean isError= jsonObj.has("error");
 				if(isError){
-					return ok("we are not getting proper response with tese search parameters \n  \n  \n"+jsonObj);
+					return ok("we are not getting proper response with tese search parameters \n  \n  \n in URL: " + urlString + "\n" +jsonObj);
 				}
 				else if(jsonObj != null){
 					array = jsonObj.getJSONArray("items");
