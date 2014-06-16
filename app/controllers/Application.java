@@ -14,7 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -23,7 +22,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.joda.time.Period;
-import org.joda.time.Seconds;
 import org.joda.time.format.ISOPeriodFormat;
 import org.joda.time.format.PeriodFormatter;
 import org.json.JSONArray;
@@ -39,13 +37,13 @@ import org.supercsv.prefs.CsvPreference;
 
 import play.Play;
 import play.data.DynamicForm;
-import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 public class Application extends Controller {
     static final String Base_URL = Play.application().configuration().getString("Base_URL");
     static final String Base_For_Vid_URL = Play.application().configuration().getString("Base_For_Vid_URL");
+    static final String Base_For_Channel_URL = Play.application().configuration().getString("Base_For_Channel_URL");
     static final String filePath = Play.application().configuration().getString("filePath");
     static final String api_key = Play.application().configuration().getString("api_key");
     
@@ -64,17 +62,13 @@ public class Application extends Controller {
 	public static Result searchData() throws ParseException, ClientProtocolException, IOException, JSONException {
 		DynamicForm form = DynamicForm.form().bindFromRequest();
 		System.out.println(Base_URL);
-		String urlString =Base_URL+"part=snippet&key="+api_key+"&maxResults=50";//
+		String urlString =Base_URL;//
 		String searchString = form.get("Search_Keyword");
-			if(searchString!= null && !searchString.isEmpty()){
-				searchString = URLEncoder.encode(searchString,"UTF-8");
-				urlString+="&q="+searchString;
-			}
-		String channel=form.get("Channel_Keyword");
-			if(channel != null && !channel.isEmpty()){
-			    channel = URLEncoder.encode(channel,"UTF-8");
-			    urlString+="&channelId="+channel;
-			}
+				if(searchString!= null && !searchString.isEmpty()){
+					searchString = URLEncoder.encode(searchString,"UTF-8");
+					urlString+="&q="+searchString;
+				}
+	
 		String frmDate =  form.get("from");
 		DateFormat format = new SimpleDateFormat("MMM-dd-yyyy");
 		DateFormat format2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -114,15 +108,46 @@ public class Application extends Controller {
 				urlString+="&type=video";
 			}
 		String fileName=form.get("Search_Keyword");
+				if(fileName.isEmpty() || fileName== null)
+				{
+					fileName=form.get("Channel_Keyword");
+				}
 		String dateName="";
+		String videoIds="";
 		ICsvBeanWriter beanWriter = null;
-			JSONObject jsonObj = null;
-			JSONArray array = null;
+		JSONObject jsonObj = null;
+		JSONArray array = null;
+			String channel=form.get("Channel_Keyword");
+			if(channel != null && !channel.isEmpty()){
+			    channel = URLEncoder.encode(channel,"UTF-8");
+			    String  urlChnl ="&forUsername="+channel;
+			    String channelUrl =  Base_For_Channel_URL+urlChnl;
+			    try {
+					jsonObj = getJsonObjFromUrl(channelUrl);
+					boolean isError= jsonObj.has("error");
+					if(isError){
+						return ok("we are not getting proper response with tese search parameters \n  \n  \n"+jsonObj);
+					}
+					else if(jsonObj != null){
+						array = jsonObj.getJSONArray("items");
+						int arrayLength=array.length();
+						if(arrayLength != 0){
+							String channelId=array.getJSONObject(0).getString("id");
+							urlString+="&channelId="+channelId;
+						} else if(searchString== null || searchString.isEmpty()) {
+							return ok("channel  not found");
+						}
+					}
+				} catch (URISyntaxException e) {
+					e.printStackTrace();
+				}
+			}
+			
 			try {
 				jsonObj = getJsonObjFromUrl(urlString);
 				boolean isError= jsonObj.has("error");
 				if(isError){
-					return ok("we are not getting proper response with tese search parameters \n  \n  \n in URL: " + urlString + "\n" +jsonObj);
+					return ok("we are not getting proper response with tese search parameters \n  \n  \n"+jsonObj);
 				}
 				else if(jsonObj != null){
 					array = jsonObj.getJSONArray("items");
@@ -130,8 +155,7 @@ public class Application extends Controller {
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
-	
-		String videoIds="";
+			
 			for(int n = 0; n < array.length(); n++){
 			    JSONObject object = array.getJSONObject(n);
 			    JSONObject objectI=object.getJSONObject("id");
