@@ -120,8 +120,8 @@ public class Application extends Controller {
 			String channel=form.get("Channel_Keyword");
 			if(channel != null && !channel.isEmpty()){
 			    channel = URLEncoder.encode(channel,"UTF-8");
-			    String  urlChnl ="&q="+channel;
-			    String channelUrl =  Base_URL+urlChnl;
+			    String  urlChnl ="&forUsername="+channel;
+			    String channelUrl =  Base_For_Channel_URL+urlChnl;
 			    try {
 					jsonObj = getJsonObjFromUrl(channelUrl);
 					boolean isError= jsonObj.has("error");
@@ -132,7 +132,7 @@ public class Application extends Controller {
 						array = jsonObj.getJSONArray("items");
 						int arrayLength=array.length();
 						if(arrayLength != 0){
-							String channelId=array.getJSONObject(0).getJSONObject("id").getString("channelId");
+							String channelId=array.getJSONObject(0).getString("id");
 							urlString+="&channelId="+channelId;
 						} else if(searchString== null || searchString.isEmpty()) {
 							return ok("channel  not found");
