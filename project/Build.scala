@@ -14,7 +14,9 @@ object ApplicationBuild extends Build {
      "org.jsoup" % "jsoup" % "1.7.3",
     javaCore,
     javaJdbc,
-    javaEbean
+    javaEbean,
+     "mysql" % "mysql-connector-java" % "5.1.18"
+     
   )
 
   val main = play.Project(appName, appVersion, appDependencies).settings(

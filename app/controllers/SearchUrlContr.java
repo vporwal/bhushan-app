@@ -89,7 +89,7 @@ public class SearchUrlContr extends Controller {
     	return ok(new File(filePath+File.separator+fileName+'-'+dateName+".csv"));
     }
     public static List<UrlResult> generateArrayList(Elements links,String htmlMainUrl)  {
-    	List<UrlResult> urlResults= new ArrayList<>();
+    	List<UrlResult> urlResults= new ArrayList<UrlResult>();
 	    	for (Element link : links) 
 	    	{
 	    		Elements linksCss= link.getElementsByTag("link");

@@ -34,11 +34,14 @@ import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvBeanWriter;
 import org.supercsv.io.ICsvBeanWriter;
 import org.supercsv.prefs.CsvPreference;
-
+import models.Task;
 import play.Play;
 import play.data.DynamicForm;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.adminhome;
+import views.html.selectPages;
 
 public class Application extends Controller {
     static final String Base_URL = Play.application().configuration().getString("Base_URL");
@@ -181,7 +184,7 @@ public class Application extends Controller {
 				e.printStackTrace();
 			}
 			
-		List<YouTubeResult> results= new ArrayList<>();
+		List<YouTubeResult> results= new ArrayList<YouTubeResult>();
 			for(int n = 0; n < array2.length(); n++){
 				YouTubeResult result = new  YouTubeResult(); 
 			    JSONObject object = array2.getJSONObject(n);
@@ -278,4 +281,62 @@ public class Application extends Controller {
 			duration=p.getHours()+":"+p.getMinutes()+":"+p.getSeconds();
 		    return duration;
 	}
+	
+	public static Result adminhome() {
+        return ok(adminhome.render());
+    }
+	
+	public static Result selectPages(String token){
+    	
+    	//DynamicForm form = DynamicForm.form().bindFromRequest();
+        //String token = form.get("appAccessToken");
+        System.out.println(token);
+        return ok(selectPages.render(token));
+    }
+    
+    public static Result newPage(){
+    DynamicForm form = DynamicForm.form().bindFromRequest();
+    String pageName = form.get("pagename");
+    	//System.out.println("page need to be insertrd is:" + pageName);
+    	// ======== TODO DB 
+    	Task task = Task.saveTask(pageName);
+    	//=======
+    	//Map<String, String>  map = new HashMap();
+    	//map.put("id", "1");
+    	//map.put("name", pageName);
+    	
+    	return ok(Json.toJson(task));
+    }
+    
+    public static Result getAllPages(){
+    
+    	List<Task> pages = Task.getPages();
+    	return ok(Json.toJson(pages));
+    }
+    public static Result delPage(){
+    	DynamicForm form = DynamicForm.form().bindFromRequest();
+        String pid = form.get("pageid");
+		//System.out.println("id of page to be deleted" + pid);
+        Long l = Long.parseLong(pid);
+        List<Task> dTask = Task.delTask(l);
+        return ok(Json.toJson(dTask));
+       // return ok();
+    }
+    
+    public static Result searchPage(){
+    DynamicForm form = DynamicForm.form().bindFromRequest();
+    String searchName = form.get("searchname");
+    //System.out.println("search wala query: "+searchName);
+    List<Task> sTask = Task.searchTask(searchName);
+    return ok(Json.toJson(sTask));
+    }
+    
+   /* public static Result submitPages(){
+    	DynamicForm form = DynamicForm.form().bindFromRequest();
+        String pagelist = form.get("spages");
+        String pages[] = pagelist.split(",");
+    	for(int i=0; i<pages.length; i++){System.out.println(pages[i]);}
+    	return ok();
+    }*/
+	
 }

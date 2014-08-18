@@ -1,0 +1,92 @@
+@(token : String)
+<html ng-app="myFacebookApp">
+<head>
+<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.10/angular.min.js">  </script>
+<script src='@routes.Assets.at("/javascripts/main.js")'>  </script>
+<script src="@routes.Assets.at("app/bower_components/angular-resource/angular-resource.js")"></script>
+<script	src="http://vitalets.github.io/checklist-model/checklist-model.js">  </script>
+
+
+    <link href='http://fonts.googleapis.com/css?family=Fjalla+One' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Titillium+Web' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Rationale' rel='stylesheet' type='text/css'>
+	<link href='@routes.Assets.at("/stylesheets/style-admin.css")' rel="stylesheet" type="text/css" />
+	<link href='@routes.Assets.at("/stylesheets/form-element-style.css")' rel="stylesheet" type="text/css" /> <!-CSS sheet for designers form element->
+	<link href='@routes.Assets.at("/stylesheets/main-syle.css")' rel="stylesheet" type="text/css" />
+	<link href='@routes.Assets.at("/stylesheets/jquery.jscrollpane.css")' rel="stylesheet" type="text/css" media="all" />
+
+</head>
+
+<body>
+	<div ng-controller="selectController">
+		<div ng-init="getall('@token')">
+			
+			
+		
+		
+<!--container begin-->
+    <section id="container">
+    	<section class="contentpanel">
+        	
+            <!--Advance search fildes begin-->
+        	<section class="dadsrch">
+            	
+                <section class="dadsrchdiv">
+  <form>  <div>  <input type="text" id="search_name" ng-model="search_name" style="width: 390px"/> 
+      <input type="button" name="search" value="Search" ng-click=searchPage() />
+      <input type="button" name="home" value="Home" ng-click="getall(@token)" style="float:right;"></div>
+     <div></form> 
+     From: <input type="date" name="from" ng-model="fromDate" id="fromDate"/>
+     To: <input type="date" name="to" ng-model="toDate" id="toDate"/> 
+     <input type="button" name="submit" value="Submit" id="submit" ng-click=submitPages(fromDate,toDate) disabled />
+     </div>
+     
+               </section>
+            </section>
+            <!--Advance search fildes end-->
+            
+            
+            <!--grid begin-->
+        	<section class="dgridinfo dactcln">
+                <table ng-table="tableParams">
+                	<thead>
+                    	<tr>
+                            
+                            <th><a>Page Name</a></th>
+                            <th><a>Check</a></th>
+                            
+                        <tr>
+                    </thead>
+                	<tbody>
+                    	<tr ng-repeat="page in npages_a track by $index">
+                            <td>{{ page.pname }}</td>
+                            <td><input type="checkbox" value="page" ng-model="page.flag" ng-change=insertPage(page.pname,page.flag) ></td>
+                        </tr>
+                    	</tbody>
+                </table>
+        	</section>
+            <!--grid end-->
+           
+<section class="dpaging">
+            	
+            	<span class="dpagingright">
+                	<!-- <a href="javascript:void(0);" class="dpagingfst" ng-click="first()">First</a> -->
+                	<a href="javascript:void(0);" class="dpagingprv" ng-click="prev()">Prev</a>
+                	<!-- <a href="javascript:void(0);" ng-click="first()">01</a>
+                	<a href="javascript:void(0);" ng-click="pageTwo()">02</a>
+                	<a href="javascript:void(0);" ng-click="pageThree()">03</a>
+                	<a href="javascript:void(0);" ng-click="pageFour()">04</a>
+                	<a href="javascript:void(0);" ng-click="pageFive()">05</a> -->
+                	<a href="javascript:void(0);" class="dpagingnxt" ng-click="next()">Next</a>
+                	<!-- <a href="javascript:void(0);" class="dpaginglst" ng-click="last()">Last</a> -->
+                </span>
+            </section>
+              	</div>
+		
+	</section>
+    </section>
+    <!--container end-->
+
+	</div>
+</body>
+</html>

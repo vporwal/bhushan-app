@@ -1,0 +1,163 @@
+@(message: String)
+
+<!DOCTYPE html>
+<html lang="en" data-ng-app="myFacebookApp" data-ng-controller="facebookcontroller">
+	<head>
+		<title>@message</title>
+		<script src='@routes.Assets.at("app/bower_components/jquery/jquery.min.js")' type="text/javascript"></script>
+		<script src='@routes.Assets.at("app/bower_components/bootstrap/dist/js/bootstrap.min.js")' type="text/javascript"></script>
+		<script src='@routes.Assets.at("app/bower_components/angular/angular.min.js")' type="text/javascript"></script>
+		<link rel="stylesheet" media="screen" href='@routes.Assets.at("app/bower_components/bootstrap/dist/css/bootstrap.min.css")'>
+		
+		<!-- <script src='@routes.Assets.at("javascripts/bootstrap_fwk/ui-bootstrap-tpls-0.10.0.min.js")' type="text/javascript"></script> -->
+		
+		<script>
+			angular.module("myFacebookApp", [])
+				.controller('facebookcontroller', function($scope, $http, $q, $location) {
+					
+					$scope.appAccessToken = '';
+					
+					window.fbAsyncInit = function() {
+					    FB.init({
+					    	appId      : '514688492009735',
+					        status	 : true,
+					        cookie     : true,
+					        xfbml      : false, //make this false if not using facebook social plugins on your page.
+					        version    : 'v2.0'
+					});
+					        
+					  
+			
+						FB.getLoginStatus(function(response) {
+					
+							
+							var status = $scope.statusChangeCallback(response);
+						
+							if (!status) {
+								FB.login(
+								    function(){
+								    	console.log('calling login...');
+								 			  }, 
+								    			{scope: 'read_stream'},
+												{redirect_url: 'http://localhost:9000/selectPages'}
+										);
+										 } else
+										 {
+										/* $http.get('/selectPages',{params:{"appAccessToken": $scope.appAccessToken}})
+										.then(function(res){window.location = 'http://localhost:9000/selectPages'}, function(error){}); */
+											
+										window.location = 'http://localhost:9000/selectPages/'+$scope.appAccessToken
+										console.log($scope.appAccessToken);
+										 }
+					});
+						
+						  
+						
+						FB.Event.subscribe('auth.login', function(response) {
+							 if (response.status === 'connected') {
+								 $scope.appAccessToken = response.authResponse.accessToken;
+								 window.location = 'http://localhost:9000/selectPages/'+$scope.appAccessToken
+		
+			        }
+						
+					});
+		
+			};
+		
+			
+			
+			
+			(function(d, s, id){
+			       var js, fjs = d.getElementsByTagName(s)[0];
+			       if (d.getElementById(id)) {return;}
+			       js = d.createElement(s); js.id = id;
+			       js.src = "//connect.facebook.net/en_US/sdk.js";
+			       fjs.parentNode.insertBefore(js, fjs);
+				}
+			(document, 'script', 'facebook-jssdk'));
+		
+		
+			$scope.loginStatus = false;
+			$scope.facebookPages = {};
+					
+			$scope.setLoading = function(loading) {
+					$scope.isLoading = loading;
+				}
+					
+			
+			$scope.exportPagesPosts = function() {
+					$scope.setLoading(true);
+					var d = $q.defer();
+					$http.get("posts/download?accessToken="+$scope.appAccessToken).success(function(response) {
+								console.log('request is successful...');
+							});
+					
+					setTimeout(function () {
+						d.resolve('some data'); //inform listeners that the process is completed
+					   	$scope.setLoading(false);
+					   	}, 1000);
+					
+					return d.promise;
+			};
+
+				
+			$scope.statusChangeCallback = function(statusResponse) {
+						/** user has to be logged in since we require read stream access token 
+						to get the posts from other pages...*/
+						
+						if (statusResponse.status === 'connected') {
+							//console.log('status response - connected');
+							$scope.appAccessToken = statusResponse.authResponse.accessToken;
+							$scope.loginStatus = true;
+							$scope.$apply();
+							return true;
+					    } else if (statusResponse.status === 'not_authorized') {
+							// The person is logged into Facebook, but not your app.
+					      	//console.log('status response - not connected');
+							document.getElementById('status').innerHTML = 'Please log ' + 'into this app.';
+					      	$scope.loginStatus = false;
+							$scope.$apply();
+							return false;
+					      	
+					    } else {
+							// The person is not logged into Facebook, so we're not sure if
+					      	// they are logged into this app or not.
+					      	//console.log('status response - duh');
+					      	document.getElementById('status').innerHTML = 'Please log ' + 'into Facebook.';
+					      	$scope.loginStatus = false;
+							$scope.$apply();
+					       	return false;
+						}
+			}
+					 
+		
+			/* $scope.$watch("loginStatus", function(status) {
+						console.log('calling.. ' + status	);
+						$scope.loginStatus = status;
+					}) */
+		});
+		</script>
+	</head>
+
+	<body role="document">
+		
+		<div>
+			Home page for reading facebook posts of pages.
+			<!-- <fb:login-button></fb:login-button> -->
+			<div id="status"></div>
+		</div>
+		
+		<div id="fb-root">
+			<div id="accessToken"></div>
+			<div id="status"></div>
+		</div>
+		<div id="veil" data-ng-show="isLoading"></div>
+		<!-- <div id="feedLoading" data-ng-show="isLoading">
+			<img src='@routes.Assets.at("app/images/loading.gif")'/>
+		</div> -->
+				
+		<a id="download_file" href="#" download="data.csv" id="btnExport" 
+			data-ng-click="exportPagesPosts()" data-ng-show="loginStatus">Export the CSV file</a>
+		
+	</body>
+</html>

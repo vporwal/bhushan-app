@@ -13,3 +13,17 @@ GET     /searchByUrl                     controllers.SearchUrlContr.searchByUrl(
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+GET		/home				controllers.Application.adminhome()
+GET		/get-all-pages			controllers.Application.getAllPages()
+POST	/add-pages				controllers.Application.newPage()
+GET		/del-page			controllers.Application.delPage()
+POST		/search-page			controllers.Application.searchPage()
+GET 	/selectPages/:token			controllers.Application.selectPages(token : String)
+#GET 	/selectPages				controllers.Application.selectPages()
+#POST		/submit-pages			controllers.Application.submitPages()
+
+GET    /facebook/posts                       com.facebook.web.FacebookApplication.index()
+#GET    /facebook/posts/download		com.facebook.web.FacebookApplication.downloadContents(accessToken)
+
+POST		/selectPages/facebook/posts/download			com.facebook.web.FacebookApplication.downloadContents()
