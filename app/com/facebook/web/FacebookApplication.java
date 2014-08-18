@@ -111,18 +111,18 @@ public class FacebookApplication extends Controller {
 				JSONObject jsnobject;
 				if(f != 0 && t != 0){
 				jsnobject = 
-						getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&access_token=" + accessToken+"&since="+f+"&until="+t);//new JSONObject(postStr);
+						getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&limit=50&access_token=" + accessToken+"&since="+f+"&until="+t);//new JSONObject(postStr);
 		//		System.out.println(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&access_token=" + accessToken+"&since="+fDate+"&until="+tDate);
 				}
 				else if(f != 0 && t == 0){
 					jsnobject = 
-							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&access_token=" + accessToken+"&since="+f);	
+							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&limit=50&access_token=" + accessToken+"&since="+f);	
 				}else if(f ==0 && t != 0){
 					jsnobject = 
-							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&access_token=" + accessToken+"&until="+t);
+							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&limit=50&access_token=" + accessToken+"&until="+t);
 				}else{
 					jsnobject = 
-							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&access_token=" + accessToken);
+							getJsonObjFromUrl(BASE_URL + pageName + "/posts?method=GET&format=json&suppress_http_code=1&limit=50&access_token=" + accessToken);
 				}
 				JSONArray jsonArray = jsnobject.getJSONArray("data");
 
@@ -133,10 +133,26 @@ public class FacebookApplication extends Controller {
 						JSONObject obj = explrObject.getJSONObject("from");
 
 						FacebookPostVO vo = new FacebookPostVO();
+						
 						vo.setFrom(obj.getString("name"));
-						vo.setMessage(explrObject.getString("message"));
-						vo.setPicture(explrObject.getString("picture"));
-						vo.setLink(explrObject.getString("link"));
+						
+						if (explrObject.has("message")) { 
+							vo.setMessage(explrObject.getString("message")); 
+						} else { 
+							vo.setMessage(""); 
+						}
+						
+						if (explrObject.has("picture")) { 
+							vo.setPicture(explrObject.getString("picture")); 
+						} else { 
+							vo.setPicture(""); 
+						}
+						
+						if (explrObject.has("link")) { 
+							vo.setLink(explrObject.getString("link")); 
+						} else { 
+							vo.setLink(""); 
+						}
 						
 						JSONObject picture = getJsonObjFromUrl(
 								BASE_URL + explrObject.getString("object_id") + "/picture?type=normal&method=GET&format=json&redirect=false&access_token=" + accessToken);//new JSONObject(postStr);
@@ -145,9 +161,25 @@ public class FacebookApplication extends Controller {
 						vo.setPicture(data.getString("url"));
 						
 						vo.setType(type);
-						vo.setIcon(explrObject.getString("icon"));
-						vo.setCreated_time(explrObject.getString("created_time"));
-						vo.setUpdated_time(explrObject.getString("updated_time"));
+						
+						if (explrObject.has("icon")) { 
+							vo.setIcon(explrObject.getString("icon")); 
+						} else { 
+							vo.setIcon(""); 
+						}
+												
+						if (explrObject.has("created_time")) { 
+							vo.setCreated_time(explrObject.getString("created_time")); 
+						} else { 
+							vo.setCreated_time(""); 
+						}
+						
+						if (explrObject.has("updated_time")) { 
+							vo.setUpdated_time(explrObject.getString("updated_time")); 
+						} else { 
+							vo.setUpdated_time(""); 
+						}
+						
 						postLists.add(vo);
 					}
 				}
